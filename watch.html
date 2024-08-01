@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스톱워치 & 타이머</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .tab {
+            display: inline-block;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab.active {
+            background-color: white;
+        }
+        .content {
+            display: none;
+            padding: 20px;
+        }
+        .content.active {
+            display: block;
+        }
+        .time {
+            font-size: 48px;
+            margin: 20px 0;
+        }
+        button {
+            font-size: 16px;
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        input {
+            font-size: 16px;
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div>
+            <span class="tab active" onclick="showContent('stopwatch')">스톱워치</span>
+            <span class="tab" onclick="showContent('timer')">타이머</span>
+        </div>
+        <div id="stopwatch" class="content active">
+            <div class="time" id="stopwatchTime">00:00:00</div>
+            <button onclick="startStopwatch()">시작</button>
+            <button onclick="stopStopwatch()">정지</button>
+            <button onclick="resetStopwatch()">리셋</button>
+        </div>
+        <div id="timer" class="content">
+            <input type="number" id="minutes" placeholder="분" min="0">
+            <input type="number" id="seconds" placeholder="초" min="0" max="59">
+            <div class="time" id="timerTime">00:00</div>
+            <button onclick="startTimer()">시작</button>
+            <button onclick="stopTimer()">정지</button>
+            <button onclick="resetTimer()">리셋</button>
+        </div>
+    </div>
+
+    <script>
+        let stopwatchInterval;
+        let timerInterval;
+        let stopwatchTime = 0;
+        let timerTime = 0;
+
+        function showContent(id) {
+            document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelector(`.tab:nth-child(${id === 'stopwatch' ? 1 : 2})`).classList.add('active');
+        }
+
+        function formatTime(time) {
+            let hours = Math.floor(time / 3600);
+            let minutes = Math.floor((time % 3600) / 60);
+            let seconds = time % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startStopwatch() {
+            if (!stopwatchInterval) {
+                stopwatchInterval = setInterval(() => {
+                    stopwatchTime++;
+                    document.getElementById('stopwatchTime').textContent = formatTime(stopwatchTime);
+                }, 1000);
+            }
+        }
+
+        function stopStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchInterval = null;
+        }
+
+        function resetStopwatch() {
+            stopStopwatch();
+            stopwatchTime = 0;
+            document.getElementById('stopwatchTime').textContent = formatTime(stopwatchTime);
+        }
+
+        function startTimer() {
+            if (!timerInterval) {
+                let minutes = parseInt(document.getElementById('minutes').value) || 0;
+                let seconds = parseInt(document.getElementById('seconds').value) || 0;
+                timerTime = minutes * 60 + seconds;
+                timerInterval = setInterval(() => {
+                    if (timerTime > 0) {
+                        timerTime--;
+                        document.getElementById('timerTime').textContent = formatTime(timerTime).slice(3);
+                    } else {
+                        stopTimer();
+                        alert('타이머가 종료되었습니다!');
+                    }
+                }, 1000);
+            }
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        function resetTimer() {
+            stopTimer();
+            document.getElementById('minutes').value = '';
+            document.getElementById('seconds').value = '';
+            document.getElementById('timerTime').textContent = '00:00';
+        }
+    </script>
+</body>
+</html>
